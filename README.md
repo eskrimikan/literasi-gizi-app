@@ -5,7 +5,9 @@ II3140 Pengembangan Aplikasi Web dan Mobile, Kelompok Aiko. Aplikasi ini membant
 SD belajar gizi seimbang lewat jalur belajar bertahap, kuis adaptif, poin, lencana, dan
 misi harian, dengan akun yang dikelola orang tua.
 
-Dibangun dengan React Native (Expo SDK 58) dan Expo Router. Data diambil dari microservice
+Dibangun dengan React Native (Expo SDK 58) dan Expo Router. Tampilan dibuat ramah anak:
+font Fredoka, warna pastel, maskot Jeru si Jeruk dan stiker makanan per topik (digambar
+sendiri dengan `react-native-svg`), serta jalur belajar berbentuk peta. Data diambil dari microservice
 LiterasiGizi di STB: `https://aiko.stei.site/api` (repo backend:
 <https://github.com/jackoluciano/aiko>).
 

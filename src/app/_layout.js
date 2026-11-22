@@ -1,12 +1,12 @@
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import {
-  Poppins_400Regular,
-  Poppins_500Medium,
-  Poppins_600SemiBold,
-  Poppins_700Bold,
+  Fredoka_400Regular,
+  Fredoka_500Medium,
+  Fredoka_600SemiBold,
+  Fredoka_700Bold,
   useFonts,
-} from '@expo-google-fonts/poppins';
+} from '@expo-google-fonts/fredoka';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { colors, fonts } from '../theme';
 
@@ -14,10 +14,10 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Poppins_400Regular,
-    Poppins_500Medium,
-    Poppins_600SemiBold,
-    Poppins_700Bold,
+    Fredoka_400Regular,
+    Fredoka_500Medium,
+    Fredoka_600SemiBold,
+    Fredoka_700Bold,
   });
 
   if (!fontsLoaded && !fontError) return null;
@@ -44,7 +44,7 @@ function RootNavigator() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.primaryDark,
-        headerTitleStyle: { fontFamily: fonts.semibold, color: colors.text },
+        headerTitleStyle: { fontFamily: fonts.heading, fontSize: 19, color: colors.text },
         headerShadowVisible: false,
         headerBackTitle: 'Kembali',
         contentStyle: { backgroundColor: colors.background },

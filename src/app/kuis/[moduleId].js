@@ -3,12 +3,14 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LearningApi } from '../../services/ApiService';
-import { Body, Button, Card, ErrorState, Loading, ProgressBar, Screen } from '../../components/ui';
+import { Mascot } from '../../components/illustrations';
+import { Body, Button, ErrorState, Loading, ProgressBar, Screen } from '../../components/ui';
 import { colors, fonts, radius, spacing } from '../../theme';
 import { friendlyError, topicLabel } from '../../utils/labels';
 
 const DIFFICULTY = { 1: 'Mudah', 2: 'Sedang', 3: 'Menantang' };
 const LETTERS = ['A', 'B', 'C', 'D'];
+const LETTER_COLORS = ['#6EC1F7', '#FF7EA6', '#B38CF5', '#FF9F43'];
 
 // Kuis adaptif (konteks Jalur Belajar & Kuis).
 // Backend memilih tingkat kesulitan soal berikutnya dari jawaban sebelumnya.
@@ -91,19 +93,27 @@ export default function QuizScreen() {
   if (!question) return <Loading label="Menyiapkan soal..." />;
 
   const shownNumber = Math.min(number, total || number);
+  const mood = feedback ? (feedback.isCorrect ? 'party' : 'sad') : submitting ? 'think' : 'happy';
 
   return (
     <Screen edges={['bottom']}>
       <View style={styles.progressHead}>
-        <Text style={styles.counter}>Soal {shownNumber} dari {total}</Text>
-        <Text style={styles.level}>{DIFFICULTY[question.difficulty] || ''}</Text>
+        <Text style={styles.counter}>Soal {shownNumber}/{total}</Text>
+        <View style={styles.levelPill}>
+          <Ionicons name="flash" size={13} color={colors.yellowDark} />
+          <Text style={styles.level}>{DIFFICULTY[question.difficulty] || ''}</Text>
+        </View>
       </View>
-      <ProgressBar value={shownNumber - (feedback ? 0 : 1)} max={total} style={styles.bar} />
+      <ProgressBar value={shownNumber - (feedback ? 0 : 1)} max={total} color={colors.yellow} height={16} style={styles.bar} />
 
-      <Card style={styles.questionCard}>
-        <Text style={styles.topic}>{topicLabel(question.topic)}</Text>
-        <Text style={styles.question}>{question.text}</Text>
-      </Card>
+      <View style={styles.questionRow}>
+        <Mascot size={86} mood={mood} />
+        <View style={styles.questionBubble}>
+          <View style={styles.bubbleTail} />
+          <Text style={styles.topic}>{topicLabel(question.topic)}</Text>
+          <Text style={styles.question}>{question.text}</Text>
+        </View>
+      </View>
 
       {question.options.map((option, index) => {
         const isChosen = chosen === index;
@@ -119,17 +129,27 @@ export default function QuizScreen() {
               isChosen && !feedback && styles.optionChosen,
               isCorrect && styles.optionCorrect,
               isWrongChoice && styles.optionWrong,
-              pressed && !feedback && styles.pressed,
+              feedback && !isCorrect && !isWrongChoice && styles.optionDim,
+              pressed && !feedback && styles.optionPressed,
             ]}
           >
-            <View style={[styles.letter, isCorrect && styles.letterCorrect, isWrongChoice && styles.letterWrong]}>
-              <Text style={[styles.letterText, (isCorrect || isWrongChoice) && styles.letterTextOn]}>
-                {LETTERS[index]}
-              </Text>
+            <View
+              style={[
+                styles.letter,
+                { backgroundColor: LETTER_COLORS[index % LETTER_COLORS.length] },
+                isCorrect && styles.letterCorrect,
+                isWrongChoice && styles.letterWrong,
+              ]}
+            >
+              {isCorrect ? (
+                <Ionicons name="checkmark" size={20} color={colors.white} />
+              ) : isWrongChoice ? (
+                <Ionicons name="close" size={20} color={colors.white} />
+              ) : (
+                <Text style={styles.letterText}>{LETTERS[index]}</Text>
+              )}
             </View>
             <Text style={styles.optionText}>{option}</Text>
-            {isCorrect ? <Ionicons name="checkmark-circle" size={22} color={colors.primary} /> : null}
-            {isWrongChoice ? <Ionicons name="close-circle" size={22} color={colors.danger} /> : null}
           </Pressable>
         );
       })}
@@ -137,69 +157,99 @@ export default function QuizScreen() {
       {error ? <Body style={styles.inlineError}>{error}</Body> : null}
 
       {feedback ? (
-        <Card style={[styles.feedback, feedback.isCorrect ? styles.feedbackOk : styles.feedbackNo]}>
-          <Text style={styles.feedbackTitle}>
-            {feedback.isCorrect ? 'Benar, hebat!' : 'Belum tepat, tidak apa-apa.'}
+        <View style={[styles.feedback, feedback.isCorrect ? styles.feedbackOk : styles.feedbackNo]}>
+          <Text style={[styles.feedbackTitle, { color: feedback.isCorrect ? colors.primaryDark : colors.orangeDark }]}>
+            {feedback.isCorrect ? 'Benar, hebat!' : 'Belum tepat, tidak apa-apa!'}
           </Text>
           <Body>{feedback.explanation}</Body>
-        </Card>
-      ) : null}
-
-      {feedback ? (
-        <Button
-          title={pending && pending.finished ? 'Lihat hasil' : 'Soal berikutnya'}
-          icon={pending && pending.finished ? 'trophy-outline' : 'arrow-forward'}
-          onPress={next}
-        />
-      ) : submitting ? (
-        <Body muted style={styles.center}>Memeriksa jawaban...</Body>
+          <Button
+            title={pending && pending.finished ? 'Lihat hasil' : 'Lanjut'}
+            variant={feedback.isCorrect ? 'primary' : 'yellow'}
+            icon={pending && pending.finished ? 'trophy' : 'arrow-forward'}
+            onPress={next}
+            style={styles.nextButton}
+          />
+        </View>
       ) : (
-        <Body muted style={styles.center}>Pilih satu jawaban.</Body>
+        <Body muted style={styles.center}>{submitting ? 'Memeriksa jawaban...' : 'Ketuk satu jawaban.'}</Body>
       )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  progressHead: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.xs },
-  counter: { fontFamily: fonts.semibold, fontSize: 13, color: colors.text },
-  level: { fontFamily: fonts.medium, fontSize: 12, color: colors.accent },
+  progressHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  counter: { fontFamily: fonts.heading, fontSize: 17, color: colors.text },
+  levelPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.yellowSoft,
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  level: { fontFamily: fonts.medium, fontSize: 13, color: colors.yellowDark, marginLeft: 3 },
   bar: { marginBottom: spacing.md },
-  questionCard: { paddingVertical: spacing.lg },
-  topic: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, marginBottom: spacing.xs },
-  question: { fontFamily: fonts.semibold, fontSize: 19, lineHeight: 28, color: colors.text },
+  questionRow: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: spacing.md },
+  questionBubble: {
+    flex: 1,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    borderWidth: 2,
+    borderColor: colors.border,
+    borderBottomWidth: 5,
+    borderBottomColor: colors.borderStrong,
+    padding: spacing.md,
+    marginLeft: spacing.sm,
+  },
+  bubbleTail: {
+    position: 'absolute',
+    left: -10,
+    bottom: 18,
+    width: 18,
+    height: 18,
+    backgroundColor: colors.surface,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: colors.border,
+    transform: [{ rotate: '45deg' }],
+  },
+  topic: { fontFamily: fonts.medium, fontSize: 13, color: colors.textMuted, marginBottom: 2 },
+  question: { fontFamily: fonts.heading, fontSize: 21, lineHeight: 28, color: colors.text },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: colors.border,
+    borderBottomWidth: 5,
+    borderBottomColor: colors.borderStrong,
     borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
+    padding: spacing.sm + 4,
+    marginBottom: spacing.sm + 2,
   },
-  optionChosen: { borderColor: colors.accent },
-  optionCorrect: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
-  optionWrong: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
-  pressed: { opacity: 0.75 },
+  optionPressed: { borderBottomWidth: 2, marginTop: 3 },
+  optionChosen: { borderColor: colors.yellow, borderBottomColor: colors.yellowDark },
+  optionCorrect: { borderColor: colors.primary, borderBottomColor: colors.primaryDark, backgroundColor: colors.primarySoft },
+  optionWrong: { borderColor: colors.danger, borderBottomColor: colors.dangerDark, backgroundColor: colors.dangerSoft },
+  optionDim: { opacity: 0.55 },
   letter: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: colors.lockedSoft,
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.sm,
+    marginRight: spacing.sm + 4,
   },
   letterCorrect: { backgroundColor: colors.primary },
   letterWrong: { backgroundColor: colors.danger },
-  letterText: { fontFamily: fonts.bold, fontSize: 13, color: colors.text },
-  letterTextOn: { color: colors.white },
-  optionText: { flex: 1, fontFamily: fonts.medium, fontSize: 15, color: colors.text, lineHeight: 22 },
-  feedback: { marginTop: spacing.sm },
-  feedbackOk: { backgroundColor: colors.primarySoft, borderColor: colors.primarySoft },
-  feedbackNo: { backgroundColor: colors.accentSoft, borderColor: colors.accentSoft },
-  feedbackTitle: { fontFamily: fonts.bold, fontSize: 15, color: colors.text, marginBottom: 4 },
+  letterText: { fontFamily: fonts.display, fontSize: 18, color: colors.white },
+  optionText: { flex: 1, fontFamily: fonts.medium, fontSize: 18, color: colors.text, lineHeight: 24 },
+  feedback: { borderRadius: radius.lg, padding: spacing.md, marginTop: spacing.xs },
+  feedbackOk: { backgroundColor: colors.primarySoft },
+  feedbackNo: { backgroundColor: colors.orangeSoft },
+  feedbackTitle: { fontFamily: fonts.display, fontSize: 21, marginBottom: 4 },
+  nextButton: { marginTop: spacing.md },
   inlineError: { color: colors.danger, marginVertical: spacing.sm },
   center: { textAlign: 'center', marginTop: spacing.sm },
 });

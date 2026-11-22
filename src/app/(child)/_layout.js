@@ -1,33 +1,37 @@
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { tabOptions } from '../../components/tabOptions';
+import { colors } from '../../theme';
 
-// Tab untuk mode anak. Anak hanya melihat data dirinya sendiri.
+// Tab untuk mode anak (warna hijau). Anak hanya melihat data dirinya sendiri.
 export default function ChildTabs() {
   return (
-    <Tabs screenOptions={tabOptions}>
+    <Tabs screenOptions={tabOptions(colors.primaryDark)}>
       <Tabs.Screen
         name="belajar"
         options={{
           title: 'Belajar',
-          headerTitle: 'Jalur Belajarku',
-          tabBarIcon: ({ color, size }) => <Ionicons name="map" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'map' : 'map-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="lencana"
         options={{
           title: 'Lencana',
-          headerTitle: 'Poin dan Lencanaku',
-          tabBarIcon: ({ color, size }) => <Ionicons name="ribbon" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'ribbon' : 'ribbon-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profil"
         options={{
           title: 'Profil',
-          headerTitle: 'Profilku',
-          tabBarIcon: ({ color, size }) => <Ionicons name="happy" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'happy' : 'happy-outline'} size={size + 2} color={color} />
+          ),
         }}
       />
     </Tabs>

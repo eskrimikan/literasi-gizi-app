@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Switch, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { PlayerApi } from '../services/ApiService';
-import { Banner, Body, Button, Chip, Field, Screen } from '../components/ui';
+import { FruitAvatar } from '../components/illustrations';
+import { Banner, Body, Button, Card, Chip, Field, Screen } from '../components/ui';
 import { colors, fonts, spacing } from '../theme';
 import { friendlyError } from '../utils/labels';
 import { hasErrors, validateChild } from '../utils/validation';
@@ -54,6 +55,12 @@ export default function AddChildScreen() {
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Screen edges={['bottom']}>
+        <View style={styles.preview}>
+          <FruitAvatar name={form.displayName || '?'} size={84} />
+          <Text style={styles.previewName}>{form.displayName.trim() || 'Nama anak'}</Text>
+          <Body muted>{form.grade ? `Kelas ${form.grade}` : 'Pilih kelas di bawah'}</Body>
+        </View>
+        <Card>
         <Banner message={serverError} />
         <Field
           label="Nama panggilan anak"
@@ -144,7 +151,8 @@ export default function AddChildScreen() {
           />
         </View>
 
-        <Button title="Simpan profil anak" onPress={submit} loading={loading} style={styles.gap} />
+        <Button title="Simpan profil anak" variant="pink" icon="checkmark-circle" onPress={submit} loading={loading} style={styles.gap} />
+        </Card>
       </Screen>
     </KeyboardAvoidingView>
   );
@@ -152,11 +160,13 @@ export default function AddChildScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
-  label: { fontFamily: fonts.medium, fontSize: 13, color: colors.text, marginBottom: 6 },
+  preview: { alignItems: 'center', marginBottom: spacing.md },
+  previewName: { fontFamily: fonts.display, fontSize: 24, color: colors.text, marginTop: spacing.xs },
+  label: { fontFamily: fonts.heading, fontSize: 15, color: colors.text, marginBottom: 6 },
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
   error: { fontFamily: fonts.regular, fontSize: 12, color: colors.danger },
-  hint: { fontSize: 12, lineHeight: 18 },
+  hint: { fontSize: 13, lineHeight: 18 },
   gap: { marginTop: spacing.md },
   switchRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm },
-  switchLabel: { fontFamily: fonts.medium, fontSize: 14, color: colors.text },
+  switchLabel: { fontFamily: fonts.heading, fontSize: 15, color: colors.text },
 });

@@ -1,25 +1,22 @@
-import { StyleSheet, Text } from 'react-native';
 import PathView from '../../components/PathView';
-import { Body, Card } from '../../components/ui';
+import { Mascot } from '../../components/illustrations';
+import { Hero } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
-import { colors, fonts } from '../../theme';
+import { colors } from '../../theme';
 
 export default function ChildLearnScreen() {
   const { session } = useAuth();
   if (!session?.player) return null;
   const player = session.player;
 
-  const header = (
-    <Card style={styles.hello}>
-      <Text style={styles.helloTitle}>Halo, {player.display_name}!</Text>
-      <Body>Pilih modul yang terbuka, baca materinya, lalu kerjakan kuisnya.</Body>
-    </Card>
+  const hero = (
+    <Hero
+      color={colors.primary}
+      title={`Halo, ${player.display_name}!`}
+      subtitle="Ayo jelajahi peta belajar gizi hari ini."
+      art={<Mascot size={96} mood="party" />}
+    />
   );
 
-  return <PathView playerId={player.id} header={header} />;
+  return <PathView playerId={player.id} hero={hero} topColor={colors.primary} edges={['top']} />;
 }
-
-const styles = StyleSheet.create({
-  hello: { backgroundColor: colors.accentSoft, borderColor: colors.accentSoft },
-  helloTitle: { fontFamily: fonts.bold, fontSize: 20, color: colors.text },
-});

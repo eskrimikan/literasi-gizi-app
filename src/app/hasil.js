@@ -1,10 +1,21 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Mascot, Sparkle } from '../components/illustrations';
 import { Body, Button, Card, Screen, SectionTitle } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
-import { colors, fonts, spacing } from '../theme';
+import { colors, fonts, radius, spacing } from '../theme';
 import { BADGE_ICONS, BADGE_NAMES } from '../utils/labels';
+
+// Posisi taburan bintang di sekitar maskot.
+const CONFETTI = [
+  { top: 10, left: 40, size: 18, color: colors.yellow },
+  { top: 40, left: 10, size: 12, color: colors.pink },
+  { top: 120, left: 30, size: 14, color: colors.sky },
+  { top: 16, right: 44, size: 14, color: colors.pink },
+  { top: 70, right: 14, size: 20, color: colors.yellow },
+  { top: 140, right: 40, size: 12, color: colors.purple },
+];
 
 // Hasil kuis: skor, poin (konteks Progres & Pencapaian), lencana baru,
 // modul yang terbuka, dan misi harian.
@@ -26,7 +37,7 @@ export default function ResultScreen() {
     return (
       <Screen edges={['bottom']}>
         <Body>Hasil kuis tidak ditemukan.</Body>
-        <Button title="Kembali ke jalur belajar" onPress={backToPath} style={styles.gap} />
+        <Button title="Kembali ke peta belajar" onPress={backToPath} style={styles.gap} />
       </Screen>
     );
   }
@@ -35,44 +46,54 @@ export default function ResultScreen() {
 
   return (
     <Screen edges={['bottom']}>
-      <View style={styles.hero}>
-        <View style={[styles.circle, passed ? styles.circlePass : styles.circleRetry]}>
-          <Text style={styles.score}>{result.score}</Text>
-          <Text style={styles.scoreLabel}>skor</Text>
-        </View>
-        <Text style={styles.heroTitle}>{passed ? 'Kamu lulus!' : 'Hampir! Ayo coba lagi'}</Text>
-        <Body muted style={styles.centerText}>
+      <View style={[styles.hero, passed ? styles.heroPass : styles.heroRetry]}>
+        {passed
+          ? CONFETTI.map((c, i) => (
+              <View key={i} style={[styles.confetti, { top: c.top, left: c.left, right: c.right }]}>
+                <Sparkle size={c.size} color={c.color} />
+              </View>
+            ))
+          : null}
+        <Mascot size={140} mood={passed ? 'party' : 'think'} />
+        <Text style={styles.heroTitle}>{passed ? 'Hore, kamu lulus!' : 'Hampir! Ayo coba lagi'}</Text>
+        <Body style={styles.centerText}>
           {result.correct} dari {result.total} jawaban benar.
-          {passed ? ' Modul ini selesai.' : ' Pelajari lagi materinya, lalu ulangi kuis.'}
+          {passed ? ' Modul ini selesai.' : ' Baca lagi materinya, lalu ulangi kuis.'}
         </Body>
       </View>
 
       <View style={styles.stats}>
         <Card style={styles.stat}>
-          <Ionicons name="sparkles" size={20} color={colors.accent} />
-          <Text style={styles.statValue}>+{result.pointsEarned}</Text>
+          <Text style={[styles.statValue, { color: passed ? colors.primaryDark : colors.orangeDark }]}>{result.score}</Text>
+          <Text style={styles.statLabel}>skor</Text>
+        </Card>
+        <Card style={styles.stat}>
+          <Text style={[styles.statValue, { color: colors.yellowDark }]}>+{result.pointsEarned}</Text>
           <Text style={styles.statLabel}>poin</Text>
         </Card>
         <Card style={styles.stat}>
-          <Ionicons name="trending-up" size={20} color={colors.primary} />
-          <Text style={styles.statValue}>{result.level}</Text>
+          <Text style={[styles.statValue, { color: colors.purple }]}>{result.level}</Text>
           <Text style={styles.statLabel}>level</Text>
         </Card>
       </View>
 
       {result.unlockedModuleId ? (
-        <Card style={styles.info}>
-          <Ionicons name="lock-open" size={20} color={colors.primary} />
-          <Body style={styles.infoText}>Modul berikutnya sudah terbuka di jalur belajar.</Body>
+        <Card style={styles.info} tone={{ bg: colors.primarySoft, border: colors.primarySoft, shadow: '#C7E8B8' }}>
+          <View style={[styles.infoIcon, { backgroundColor: colors.primary }]}>
+            <Ionicons name="lock-open" size={20} color={colors.white} />
+          </View>
+          <Body style={styles.infoText}>Modul berikutnya sudah terbuka di peta belajar!</Body>
         </Card>
       ) : null}
 
       {result.newBadges && result.newBadges.length > 0 ? (
         <>
-          <SectionTitle>Lencana baru</SectionTitle>
+          <SectionTitle icon="ribbon" iconColor={colors.purple}>Lencana baru</SectionTitle>
           {result.newBadges.map((code) => (
             <Card key={code} style={styles.info}>
-              <Ionicons name={BADGE_ICONS[code] || 'ribbon'} size={20} color={colors.accent} />
+              <View style={[styles.infoIcon, { backgroundColor: colors.yellow }]}>
+                <Ionicons name={BADGE_ICONS[code] || 'ribbon'} size={20} color={colors.white} />
+              </View>
               <Body style={styles.infoText}>{BADGE_NAMES[code] || code}</Body>
             </Card>
           ))}
@@ -81,10 +102,10 @@ export default function ResultScreen() {
 
       {result.mission ? (
         <>
-          <SectionTitle>Misi hari ini</SectionTitle>
-          <Card>
+          <SectionTitle icon="flag" iconColor={colors.pink}>Misi hari ini</SectionTitle>
+          <Card tone={{ bg: colors.pinkSoft, border: colors.pinkSoft, shadow: '#F8C2D3' }}>
             <Text style={styles.missionTitle}>{result.mission.title}</Text>
-            <Body muted>{result.mission.description}</Body>
+            <Body>{result.mission.description}</Body>
             <Body muted style={styles.small}>
               {session?.role === 'parent'
                 ? 'Centang misi ini di tab Progres setelah anak mengerjakannya.'
@@ -94,41 +115,41 @@ export default function ResultScreen() {
         </>
       ) : null}
 
-      {!passed ? <Button title="Ulangi kuis" icon="refresh" onPress={retry} style={styles.gap} /> : null}
+      {!passed ? <Button title="Ulangi kuis" variant="yellow" icon="refresh" onPress={retry} style={styles.gap} /> : null}
       <Button
-        title="Kembali ke jalur belajar"
+        title="Kembali ke peta belajar"
         variant={passed ? 'primary' : 'secondary'}
+        icon="map"
         onPress={backToPath}
-        style={styles.gapSmall}
+        style={passed ? styles.gap : styles.gapSmall}
       />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: { alignItems: 'center', marginVertical: spacing.md },
-  circle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+  hero: {
     alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: radius.xl,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.md,
     marginBottom: spacing.md,
+    overflow: 'hidden',
   },
-  circlePass: { backgroundColor: colors.primary },
-  circleRetry: { backgroundColor: colors.accent },
-  score: { fontFamily: fonts.bold, fontSize: 40, color: colors.white, lineHeight: 46 },
-  scoreLabel: { fontFamily: fonts.medium, fontSize: 12, color: colors.white },
-  heroTitle: { fontFamily: fonts.bold, fontSize: 22, color: colors.text },
+  heroPass: { backgroundColor: colors.yellowSoft },
+  heroRetry: { backgroundColor: colors.orangeSoft },
+  confetti: { position: 'absolute' },
+  heroTitle: { fontFamily: fonts.display, fontSize: 28, color: colors.text, marginTop: spacing.sm, textAlign: 'center' },
   centerText: { textAlign: 'center', marginTop: spacing.xs },
   stats: { flexDirection: 'row', justifyContent: 'space-between' },
-  stat: { width: '48%', alignItems: 'center' },
-  statValue: { fontFamily: fonts.bold, fontSize: 22, color: colors.text, marginTop: 4 },
-  statLabel: { fontFamily: fonts.regular, fontSize: 12, color: colors.textMuted },
+  stat: { width: '31%', alignItems: 'center', paddingVertical: spacing.sm + 4 },
+  statValue: { fontFamily: fonts.display, fontSize: 28 },
+  statLabel: { fontFamily: fonts.medium, fontSize: 14, color: colors.textMuted },
   info: { flexDirection: 'row', alignItems: 'center' },
-  infoText: { marginLeft: spacing.sm, flex: 1 },
-  missionTitle: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text },
-  small: { fontSize: 12, marginTop: spacing.xs },
+  infoIcon: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  infoText: { marginLeft: spacing.sm + 4, flex: 1 },
+  missionTitle: { fontFamily: fonts.heading, fontSize: 18, color: colors.text },
+  small: { fontSize: 13, marginTop: spacing.xs },
   gap: { marginTop: spacing.lg },
   gapSmall: { marginTop: spacing.sm },
 });

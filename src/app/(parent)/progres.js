@@ -3,8 +3,9 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { PlayerApi } from '../../services/ApiService';
 import ProgressView from '../../components/ProgressView';
-import { Button, Chip, EmptyState, ErrorState, Loading, Screen } from '../../components/ui';
-import { spacing } from '../../theme';
+import { Mascot } from '../../components/illustrations';
+import { Button, Chip, EmptyState, ErrorState, Hero, Loading, Screen } from '../../components/ui';
+import { colors, spacing } from '../../theme';
 import { friendlyError } from '../../utils/labels';
 
 // Laporan progres untuk orang tua: pilih anak, lalu lihat poin, misi, dan lencana.
@@ -32,27 +33,30 @@ export default function ParentProgressScreen() {
     }, [load])
   );
 
-  if (!players && !error) return <Loading />;
+  const selected = players ? players.find((p) => p.id === selectedId) : null;
+  const hero = (
+    <Hero
+      color={colors.pink}
+      title="Laporan Progres"
+      subtitle={selected ? `Perkembangan ${selected.display_name} hari ini` : 'Pantau perkembangan anak'}
+      art={<Mascot size={84} mood="wow" />}
+    />
+  );
 
-  if (error) {
+  if (!players || error || players.length === 0) {
     return (
-      <Screen edges={[]}>
-        <ErrorState message={error} onRetry={load} />
-      </Screen>
-    );
-  }
-
-  if (players.length === 0) {
-    return (
-      <Screen edges={[]}>
-        <EmptyState
-          icon="stats-chart-outline"
-          title="Belum ada data progres"
-          message="Tambahkan profil anak terlebih dahulu."
-          action={
-            <Button title="Tambah profil anak" onPress={() => router.push('/tambah-anak')} style={styles.action} />
-          }
-        />
+      <Screen hero={hero} topColor={colors.pink}>
+        {!players && !error ? <Loading /> : null}
+        {error ? <ErrorState message={error} onRetry={load} /> : null}
+        {players && players.length === 0 ? (
+          <EmptyState
+            title="Belum ada data progres"
+            message="Tambahkan profil anak terlebih dahulu."
+            action={
+              <Button title="Tambah profil anak" variant="pink" onPress={() => router.push('/tambah-anak')} style={styles.action} />
+            }
+          />
+        ) : null}
       </Screen>
     );
   }
@@ -64,13 +68,25 @@ export default function ParentProgressScreen() {
           key={player.id}
           label={player.display_name}
           selected={player.id === selectedId}
+          color={colors.pink}
+          shadow={colors.pinkDark}
           onPress={() => setSelectedId(player.id)}
         />
       ))}
     </ScrollView>
   );
 
-  return <ProgressView key={selectedId} playerId={selectedId} canCheckMission header={selector} />;
+  return (
+    <ProgressView
+      key={selectedId}
+      playerId={selectedId}
+      canCheckMission
+      hero={hero}
+      topColor={colors.pink}
+      edges={['top']}
+      header={players.length > 1 ? selector : null}
+    />
+  );
 }
 
 const styles = StyleSheet.create({

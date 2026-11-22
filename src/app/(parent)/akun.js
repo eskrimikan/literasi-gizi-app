@@ -1,9 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { confirmAction } from '../../utils/dialog';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL, PARTNER_APIS } from '../../services/config';
-import { Body, Button, Card, Screen, SectionTitle } from '../../components/ui';
+import { Mascot } from '../../components/illustrations';
+import { Body, Button, Card, Hero, Screen, SectionTitle } from '../../components/ui';
 import { colors, fonts, spacing } from '../../theme';
+import { confirmAction } from '../../utils/dialog';
 
 export default function AccountScreen() {
   const { session, signOut } = useAuth();
@@ -18,24 +20,42 @@ export default function AccountScreen() {
     });
   };
 
+  const hero = (
+    <Hero color={colors.pink} title="Akun Saya" subtitle={session?.user?.email} art={<Mascot size={80} mood="happy" />} />
+  );
+
   return (
-    <Screen edges={[]}>
+    <Screen hero={hero} topColor={colors.pink}>
       <Card>
-        <Text style={styles.label}>Email</Text>
-        <Text style={styles.value}>{session?.user?.email}</Text>
-        <Text style={[styles.label, styles.gap]}>Peran</Text>
-        <Text style={styles.value}>Orang tua</Text>
+        <View style={styles.row}>
+          <View style={[styles.iconBox, { backgroundColor: colors.pinkSoft }]}>
+            <Ionicons name="mail" size={20} color={colors.pinkDark} />
+          </View>
+          <View style={styles.flex}>
+            <Text style={styles.label}>Email</Text>
+            <Text style={styles.value}>{session?.user?.email}</Text>
+          </View>
+        </View>
+        <View style={[styles.row, styles.gap]}>
+          <View style={[styles.iconBox, { backgroundColor: colors.yellowSoft }]}>
+            <Ionicons name="shield-checkmark" size={20} color={colors.yellowDark} />
+          </View>
+          <View style={styles.flex}>
+            <Text style={styles.label}>Peran</Text>
+            <Text style={styles.value}>Orang tua (pengelola akun anak)</Text>
+          </View>
+        </View>
       </Card>
 
-      <SectionTitle>Privasi data anak</SectionTitle>
-      <Card>
-        <Body muted>
-          Data anak hanya bisa dilihat oleh akun orang tua yang membuat profilnya. Tidak ada papan
+      <SectionTitle icon="lock-closed" iconColor={colors.primary}>Privasi data anak</SectionTitle>
+      <Card tone={{ bg: colors.primarySoft, border: colors.primarySoft, shadow: '#C7E8B8' }}>
+        <Body>
+          Data anak hanya bisa dilihat akun orang tua yang membuat profilnya. Tidak ada papan
           peringkat antaranak. Semua data saat pengembangan adalah data uji.
         </Body>
       </Card>
 
-      <SectionTitle>Layanan terhubung</SectionTitle>
+      <SectionTitle icon="git-network" iconColor={colors.sky}>Layanan terhubung</SectionTitle>
       <Card>
         <View style={styles.serviceRow}>
           <View style={[styles.dot, styles.dotOn]} />
@@ -57,21 +77,23 @@ export default function AccountScreen() {
         ))}
       </Card>
 
-      <Button title="Keluar" variant="danger" icon="log-out-outline" onPress={confirmSignOut} style={styles.logout} />
+      <Button title="Keluar" variant="danger" icon="log-out" onPress={confirmSignOut} style={styles.logout} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  label: { fontFamily: fonts.regular, fontSize: 12, color: colors.textMuted },
-  value: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text },
-  gap: { marginTop: spacing.sm },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  gap: { marginTop: spacing.md },
+  iconBox: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm + 4 },
+  label: { fontFamily: fonts.regular, fontSize: 13, color: colors.textMuted },
+  value: { fontFamily: fonts.heading, fontSize: 16, color: colors.text },
   serviceRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6 },
-  dot: { width: 10, height: 10, borderRadius: 5, marginRight: spacing.sm },
+  dot: { width: 12, height: 12, borderRadius: 6, marginRight: spacing.sm + 2 },
   dotOn: { backgroundColor: colors.primary },
   dotOff: { backgroundColor: colors.locked },
-  serviceName: { fontFamily: fonts.medium, fontSize: 14, color: colors.text },
-  small: { fontSize: 12, lineHeight: 18 },
+  serviceName: { fontFamily: fonts.heading, fontSize: 15, color: colors.text },
+  small: { fontSize: 13, lineHeight: 18 },
   logout: { marginTop: spacing.lg },
 });

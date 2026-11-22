@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { Banner, Body, Button, Checkbox, Field, Screen } from '../components/ui';
+import { Mascot } from '../components/illustrations';
+import { Banner, Body, Button, Card, Checkbox, Field, Screen } from '../components/ui';
 import { colors, spacing } from '../theme';
 import { friendlyError } from '../utils/labels';
 import { hasErrors, validateRegister } from '../utils/validation';
@@ -35,10 +36,14 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Screen edges={[]}>
-        <Body muted style={styles.intro}>
-          Akun dibuat oleh orang tua. Setelah mendaftar, Anda bisa membuat profil anak dan
-          memantau progres belajarnya.
-        </Body>
+        <View style={styles.introRow}>
+          <Mascot size={78} mood="wow" />
+          <Body muted style={styles.intro}>
+            Akun dibuat oleh orang tua. Setelah mendaftar, Anda bisa membuat profil anak dan
+            memantau progres belajarnya.
+          </Body>
+        </View>
+        <Card>
         <Banner message={serverError} />
         <Field
           label="Email orang tua"
@@ -69,7 +74,8 @@ export default function RegisterScreen() {
           Saya orang tua atau wali dan menyetujui data anak saya diproses untuk kegiatan belajar
           di LiterasiGizi (UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi).
         </Checkbox>
-        <Button title="Daftar dan masuk" onPress={submit} loading={loading} />
+        <Button title="Daftar dan masuk" variant="pink" icon="person-add" onPress={submit} loading={loading} />
+        </Card>
       </Screen>
     </KeyboardAvoidingView>
   );
@@ -77,5 +83,6 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
-  intro: { marginBottom: spacing.md },
+  introRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
+  intro: { flex: 1, marginLeft: spacing.sm },
 });

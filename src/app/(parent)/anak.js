@@ -3,7 +3,8 @@ import { RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { PlayerApi } from '../../services/ApiService';
-import { Body, Button, Card, EmptyState, ErrorState, Loading, Screen } from '../../components/ui';
+import { FruitAvatar, Mascot } from '../../components/illustrations';
+import { Button, Card, EmptyState, ErrorState, Hero, Loading, Screen, Tag } from '../../components/ui';
 import { colors, fonts, spacing } from '../../theme';
 import { friendlyError } from '../../utils/labels';
 
@@ -34,17 +35,28 @@ export default function ChildrenScreen() {
     setRefreshing(false);
   };
 
-  if (!players && !error) return <Loading label="Memuat profil anak..." />;
+  const hero = (
+    <Hero
+      color={colors.pink}
+      title="Halo, Ayah Bunda!"
+      subtitle="Pilih anak untuk melihat jalur belajarnya."
+      art={<Mascot size={92} mood="happy" />}
+    />
+  );
 
   return (
-    <Screen edges={[]} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+    <Screen
+      hero={hero}
+      topColor={colors.pink}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
+      {!players && !error ? <Loading label="Memuat profil anak..." /> : null}
       {error ? <ErrorState message={error} onRetry={load} /> : null}
 
       {players && players.length === 0 ? (
         <EmptyState
-          icon="happy-outline"
           title="Belum ada profil anak"
-          message="Buat profil anak agar ia bisa mulai belajar gizi seimbang."
+          message="Buat profil anak dulu supaya ia bisa mulai belajar gizi seimbang."
         />
       ) : null}
 
@@ -55,47 +67,48 @@ export default function ChildrenScreen() {
               style={styles.card}
               onPress={() => router.push({ pathname: '/jalur/[playerId]', params: { playerId: player.id } })}
             >
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{player.display_name.charAt(0).toUpperCase()}</Text>
-              </View>
+              <FruitAvatar name={player.display_name} size={58} />
               <View style={styles.info}>
                 <Text style={styles.name}>{player.display_name}</Text>
-                <Body muted style={styles.meta}>
-                  Kelas {player.grade} · @{player.username}
-                </Body>
-                <Body muted style={styles.meta}>
-                  Batas belajar {player.daily_limit_minutes} menit per hari
-                </Body>
+                <Text style={styles.username}>@{player.username}</Text>
+                <View style={styles.tags}>
+                  <Tag label={`Kelas ${player.grade}`} color={colors.primaryDark} bg={colors.primarySoft} icon="school" />
+                  <Tag label={`${player.daily_limit_minutes} menit`} color={colors.skyDark} bg={colors.skySoft} icon="time" />
+                </View>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+              <View style={styles.arrow}>
+                <Ionicons name="chevron-forward" size={20} color={colors.white} />
+              </View>
             </Card>
           ))
         : null}
 
-      <Button
-        title="Tambah profil anak"
-        icon="add"
-        onPress={() => router.push('/tambah-anak')}
-        style={styles.add}
-      />
+      {players ? (
+        <Button
+          title="Tambah profil anak"
+          variant="pink"
+          icon="add-circle"
+          onPress={() => router.push('/tambah-anak')}
+          style={styles.add}
+        />
+      ) : null}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   card: { flexDirection: 'row', alignItems: 'center' },
-  avatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: colors.accentSoft,
+  info: { flex: 1, marginLeft: spacing.md },
+  name: { fontFamily: fonts.heading, fontSize: 20, color: colors.text },
+  username: { fontFamily: fonts.regular, fontSize: 14, color: colors.textMuted },
+  tags: { flexDirection: 'row', marginTop: 6, gap: 6, flexWrap: 'wrap' },
+  arrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.pink,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.md,
   },
-  avatarText: { fontFamily: fonts.bold, fontSize: 18, color: colors.accent },
-  info: { flex: 1 },
-  name: { fontFamily: fonts.semibold, fontSize: 16, color: colors.text },
-  meta: { fontSize: 12, lineHeight: 18 },
-  add: { marginTop: spacing.md },
+  add: { marginTop: spacing.sm },
 });

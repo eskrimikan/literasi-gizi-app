@@ -1,8 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { confirmAction } from '../../utils/dialog';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../../context/AuthContext';
-import { Body, Button, Card, Screen } from '../../components/ui';
+import { FruitAvatar } from '../../components/illustrations';
+import { Body, Button, Card, Hero, Screen } from '../../components/ui';
 import { colors, fonts, spacing } from '../../theme';
+import { confirmAction } from '../../utils/dialog';
 
 export default function ChildProfileScreen() {
   const { session, signOut } = useAuth();
@@ -20,43 +22,47 @@ export default function ChildProfileScreen() {
     });
   };
 
-  return (
-    <Screen edges={[]}>
+  const hero = (
+    <Hero color={colors.primary} compact>
       <View style={styles.hero}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{player.display_name.charAt(0).toUpperCase()}</Text>
+        <View style={styles.avatarRing}>
+          <FruitAvatar name={player.display_name} size={96} />
         </View>
         <Text style={styles.name}>{player.display_name}</Text>
-        <Body muted>@{player.username}</Body>
+        <Text style={styles.username}>@{player.username}</Text>
       </View>
-      <Card>
-        <Text style={styles.label}>Kelas</Text>
-        <Text style={styles.value}>Kelas {player.grade}</Text>
-        <Text style={[styles.label, styles.gap]}>Waktu belajar per hari</Text>
-        <Text style={styles.value}>{player.daily_limit_minutes} menit</Text>
-        <Body muted style={styles.note}>Batas waktu ini diatur oleh orang tuamu.</Body>
-      </Card>
-      <Button title="Keluar" variant="secondary" icon="log-out-outline" onPress={confirmSignOut} style={styles.logout} />
+    </Hero>
+  );
+
+  return (
+    <Screen hero={hero} topColor={colors.primary}>
+      <View style={styles.stats}>
+        <Card style={styles.stat} tone={{ bg: colors.yellowSoft, border: colors.yellowSoft, shadow: '#F5DC94' }}>
+          <Ionicons name="school" size={26} color={colors.yellowDark} />
+          <Text style={styles.statValue}>Kelas {player.grade}</Text>
+          <Text style={styles.statLabel}>jenjang</Text>
+        </Card>
+        <Card style={styles.stat} tone={{ bg: colors.skySoft, border: colors.skySoft, shadow: '#B9DDF5' }}>
+          <Ionicons name="time" size={26} color={colors.skyDark} />
+          <Text style={styles.statValue}>{player.daily_limit_minutes} menit</Text>
+          <Text style={styles.statLabel}>belajar per hari</Text>
+        </Card>
+      </View>
+      <Body muted style={styles.note}>Batas waktu belajar diatur oleh orang tuamu, supaya kamu tetap punya waktu bermain.</Body>
+      <Button title="Keluar" variant="secondary" icon="log-out" onPress={confirmSignOut} style={styles.logout} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: { alignItems: 'center', marginVertical: spacing.md },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm,
-  },
-  avatarText: { fontFamily: fonts.bold, fontSize: 32, color: colors.white },
-  name: { fontFamily: fonts.bold, fontSize: 22, color: colors.text },
-  label: { fontFamily: fonts.regular, fontSize: 12, color: colors.textMuted },
-  value: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text },
-  gap: { marginTop: spacing.sm },
-  note: { fontSize: 12, marginTop: spacing.sm },
+  hero: { alignItems: 'center', paddingBottom: spacing.sm },
+  avatarRing: { backgroundColor: colors.white, borderRadius: 60, padding: 8 },
+  name: { fontFamily: fonts.display, fontSize: 28, color: colors.white, marginTop: spacing.sm },
+  username: { fontFamily: fonts.medium, fontSize: 15, color: 'rgba(255,255,255,0.9)' },
+  stats: { flexDirection: 'row', justifyContent: 'space-between' },
+  stat: { width: '48%', alignItems: 'center' },
+  statValue: { fontFamily: fonts.heading, fontSize: 19, color: colors.text, marginTop: 4 },
+  statLabel: { fontFamily: fonts.regular, fontSize: 13, color: colors.textMuted },
+  note: { textAlign: 'center', marginTop: spacing.sm },
   logout: { marginTop: spacing.lg },
 });

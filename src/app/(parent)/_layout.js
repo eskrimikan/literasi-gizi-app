@@ -1,33 +1,37 @@
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { tabOptions } from '../../components/tabOptions';
+import { colors } from '../../theme';
 
-
-// Tab untuk mode orang tua.
+// Tab untuk mode orang tua (warna pink).
 export default function ParentTabs() {
   return (
-    <Tabs screenOptions={tabOptions}>
+    <Tabs screenOptions={tabOptions(colors.pinkDark)}>
       <Tabs.Screen
         name="anak"
         options={{
           title: 'Anak',
-          headerTitle: 'Profil Anak',
-          tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'people' : 'people-outline'} size={size + 2} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="progres"
         options={{
           title: 'Progres',
-          headerTitle: 'Laporan Progres',
-          tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'stats-chart' : 'stats-chart-outline'} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="akun"
         options={{
           title: 'Akun',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person-circle" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} size={size + 2} color={color} />
+          ),
         }}
       />
     </Tabs>
